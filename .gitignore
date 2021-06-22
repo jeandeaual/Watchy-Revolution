@@ -1,6 +1,7 @@
 ### Arduino
 *.bin
 *.hex
+build/
 
 
 ### VisualStudioCode ###

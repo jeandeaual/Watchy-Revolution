@@ -100,7 +100,7 @@ void Revolution::computeDecimalTime()
 
     // Convert the current time to seconds
     int secs_total = (this->currentTime.Hour * 3600) + (this->currentTime.Minute * 60) + this->currentTime.Second;
-    int next_step;
+    int next_step = 0;
 
     for (unsigned int x = 0; x < 1000; x++) {
         if (secs_total < steps[x]) {

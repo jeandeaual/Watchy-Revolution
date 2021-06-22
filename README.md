@@ -1,5 +1,7 @@
 # Revolution Watchface for [Watchy](https://watchy.sqfmi.com/)
 
+[![Build](https://github.com/jeandeaual/Watchy-Revolution/actions/workflows/build.yml/badge.svg)](https://github.com/jeandeaual/Watchy-Revolution/actions/workflows/build.yml)
+
 ## Build
 
 ### Using [arduino-cli](https://arduino.github.io/arduino-cli/latest/installation/)
@@ -29,7 +31,7 @@
    arduino-cli upload -p /dev/ttyACM0 --fqbn esp32:esp32:esp32 Watchy-Revolution
    ```
 
-   Replace `/dev/ttyACM0` by the port listed by `arduino-cli board list`.
+   Replace `/dev/ttyACM0` with the port listed by `arduino-cli board list`.
 
 ### Using the [Arduino IDE](https://www.arduino.cc/en/software)
 

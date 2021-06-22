@@ -1,5 +1,5 @@
 #include "revolution.h"
-#include "LibertinusSerif_Regular39pt7b.h"
+#include "fonts/LibertinusSerif_Regular39pt7b.h"
 
 Revolution::Revolution() {}
 
@@ -12,12 +12,12 @@ void Revolution::drawWatchFace()
     int16_t x1, y1;
     uint16_t w, h;
 
-    String time = String(hours);
-    time.concat(":");
-    if (minutes < 10) {
-        time.concat("0");
-    }
-    time.concat(minutes);
+    char time[5];
+    time[0] = '0' + hours % 10;
+    time[1] = ':';
+    time[2] = '0' + minutes / 10 % 10;
+    time[3] = '0' + minutes % 10;
+    time[4] = '\0';
 
     this->display.setFont(&LibertinusSerif_Regular39pt7b);
     this->display.setTextWrap(false);

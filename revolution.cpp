@@ -1,18 +1,21 @@
 #include "revolution.h"
+#include "fonts/LibertinusSerif_Regular18pt7b.h"
 #include "fonts/LibertinusSerif_Regular39pt7b.h"
 
 Revolution::Revolution() {}
 
 void Revolution::drawWatchFace()
 {
+    this->drawTime();
+    this->drawDate();
+}
+
+void Revolution::drawTime()
+{
     const unsigned int hours = this->decimal_minutes / 100;
     const unsigned int minutes = this->decimal_minutes % 100;
-    const int16_t x = GxEPD2_154_D67::WIDTH / 2;
-    const int16_t y = GxEPD2_154_D67::HEIGHT / 2;
-    int16_t x1, y1;
-    uint16_t w, h;
-
     char time[5];
+
     time[0] = '0' + hours % 10;
     time[1] = ':';
     time[2] = '0' + minutes / 10 % 10;
@@ -20,10 +23,46 @@ void Revolution::drawWatchFace()
     time[4] = '\0';
 
     this->display.setFont(&LibertinusSerif_Regular39pt7b);
+    this->display.setTextColor(GxEPD_WHITE);
     this->display.setTextWrap(false);
-    this->display.getTextBounds(time, x, y, &x1, &y1, &w, &h);
-    this->display.setCursor(x - w / 2, y + 20);
-    this->display.print(time);
+
+    this->drawCenteredString(time, GxEPD2_154_D67::WIDTH / 2, GxEPD2_154_D67::HEIGHT / 2 - 20);
+}
+
+void Revolution::drawDate()
+{
+    const uint16_t x = GxEPD2_154_D67::WIDTH / 2;
+    const uint16_t y_offset = 32;
+    const uint16_t base_y = GxEPD2_154_D67::HEIGHT / 2 + 20;
+
+    this->display.setFont(&LibertinusSerif_Regular18pt7b);
+    this->display.setTextColor(GxEPD_WHITE);
+    this->display.setTextWrap(false);
+
+    String dayOfWeek = dayStr(currentTime.Wday);
+    String month = monthStr(currentTime.Month);
+    char *date;
+    char *year;
+
+    asprintf(&date, "%s %d", month.c_str(), currentTime.Day);
+    asprintf(&year, "%d", 1970 + currentTime.Year);
+
+    this->drawCenteredString(dayOfWeek.c_str(), x, base_y);
+    this->drawCenteredString(date, x, base_y + y_offset);
+    this->drawCenteredString(year, x, base_y + y_offset * 2);
+
+    free(year);
+    free(date);
+}
+
+void Revolution::drawCenteredString(const char *str, const int x, const int y)
+{
+    int16_t x1, y1;
+    uint16_t w, h;
+
+    this->display.getTextBounds(str, x, y, &x1, &y1, &w, &h);
+    this->display.setCursor(x - w / 2, y);
+    this->display.print(str);
 }
 
 // Calculate the current decimal time and set a new alarm

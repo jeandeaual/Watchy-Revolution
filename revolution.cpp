@@ -28,22 +28,23 @@ void Revolution::drawTime()
     this->display.setFont(&LibertinusSerif_Regular_Numbers42pt7b);
     this->display.setTextWrap(false);
 
-    this->drawCenteredString(time, GxEPD2_154_D67::WIDTH / 2, GxEPD2_154_D67::HEIGHT / 2 - 20);
+    this->drawCenteredString(time, GxEPD2_154_D67::WIDTH / 2, GxEPD2_154_D67::HEIGHT / 2 - 35);
 }
 
 void Revolution::drawDate()
 {
     const uint16_t x = GxEPD2_154_D67::WIDTH / 2;
-    const uint16_t y_offset = 32;
-    const uint16_t base_y = GxEPD2_154_D67::HEIGHT / 2 + 20;
+    const uint16_t y_offset = 28;
+    const uint16_t base_y = GxEPD2_154_D67::HEIGHT / 2;
 
     this->display.setFont(&LibertinusSerif_Regular_French_ASCII16pt7b);
     this->display.setTextWrap(false);
 
-    const char *dayOfWeek = this->calendar.getDayName();
+    const char *dayOfWeek = this->calendar.getWeekDayName();
     int day = this->calendar.getDay();
     const char *month = this->calendar.getMonthName();
     const String year = this->calendar.getRomanizedYear();
+    const char *dayOfYear = this->calendar.getYearDayName();
     char *date;
 
     if (this->calendar.sansculottides()) {
@@ -56,6 +57,7 @@ void Revolution::drawDate()
     this->drawCenteredString(dayOfWeek, x, base_y);
     this->drawCenteredString(date, x, base_y + y_offset);
     this->drawCenteredString(year.c_str(), x, base_y + y_offset * 2);
+    this->drawCenteredString(dayOfYear, x, base_y + y_offset * 3);
 
     free(date);
 }

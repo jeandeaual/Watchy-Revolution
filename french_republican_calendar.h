@@ -10,8 +10,9 @@ private:
     static const unsigned int FRUCTIDOR;
     static const unsigned int REVOLUTION;
     static const char *MONTH_NAMES[];
-    static const char *DAY_NAMES[];
-    static const String ROMAN_NUMBER_MATRIX[14][2];
+    static const char *WEEK_DAY_NAMES[];
+    static const char *YEAR_DAY_NAMES[][2];
+    static const String ROMAN_NUMBER_MATRIX[][2];
     unsigned int year;
     unsigned int monthNumber;
     unsigned int dayInMonth;
@@ -23,7 +24,8 @@ public:
     const String getRomanizedYear() const;
     const char *getMonthName() const;
     unsigned int getDay() const;
-    const char *getDayName() const;
+    const char *getWeekDayName() const;
+    const char *getYearDayName() const;
     bool sansculottides() const;
 
 private:

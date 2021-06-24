@@ -44,7 +44,7 @@ void Revolution::drawDate()
     int day = this->calendar.getDay();
     const char *month = this->calendar.getMonthName();
     const String year = this->calendar.getRomanizedYear();
-    const char *dayOfYear = this->calendar.getYearDayName();
+    const char *dayOfYear = this->calendar.getYearDayName(FrenchRepublicanCalendar::Language::French);
     char *date;
 
     if (this->calendar.sansculottides()) {
@@ -52,7 +52,6 @@ void Revolution::drawDate()
     } else {
         asprintf(&date, "%d %s", day, month);
     }
-
 
     this->drawCenteredString(dayOfWeek, x, base_y);
     this->drawCenteredString(date, x, base_y + y_offset);

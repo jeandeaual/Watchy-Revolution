@@ -18,6 +18,12 @@ private:
     unsigned int dayInMonth;
 
 public:
+    enum class Language
+    {
+        French,
+        English
+    };
+
     FrenchRepublicanCalendar();
     void update(const time_t &currentTime);
     unsigned int getYear() const;
@@ -25,7 +31,7 @@ public:
     const char *getMonthName() const;
     unsigned int getDay() const;
     const char *getWeekDayName() const;
-    const char *getYearDayName() const;
+    const char *getYearDayName(Language lang) const;
     bool sansculottides() const;
 
 private:

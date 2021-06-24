@@ -478,9 +478,16 @@ const char *FrenchRepublicanCalendar::getWeekDayName() const
     return this->WEEK_DAY_NAMES[this->dayInMonth % 10 - 1];
 }
 
-const char *FrenchRepublicanCalendar::getYearDayName() const
+const char *FrenchRepublicanCalendar::getYearDayName(Language lang) const
 {
-    return this->YEAR_DAY_NAMES[(this->monthNumber - 1) * 30 + dayInMonth - 1][0];
+    const unsigned int dayIndex = (this->monthNumber - 1) * 30 + dayInMonth - 1;
+
+    switch (lang) {
+    case Language::English:
+        return this->YEAR_DAY_NAMES[dayIndex][1];
+    default:
+        return this->YEAR_DAY_NAMES[dayIndex][0];
+    }
 }
 
 bool FrenchRepublicanCalendar::sansculottides() const

@@ -109,18 +109,21 @@ unsigned int FrenchRepublicanCalendar::getYear() const
     return this->year;
 }
 
-const String numberMatrix[14][2] = {{"1000", "M"}, {"900", "CM"}, {"500", "D"}, {"400", "CD"}, {"100", "C"},
-                                    {"90", "XC"},  {"50", "L"},   {"40", "XL"}, {"10", "X"},   {"9", "IX"},
-                                    {"5", "V"},    {"4", "IV"},   {"1", "I"},   {"0", ""}};
+const String FrenchRepublicanCalendar::ROMAN_NUMBER_MATRIX[14][2] = {
+    {"1000", "M"}, {"900", "CM"}, {"500", "D"}, {"400", "CD"}, {"100", "C"}, {"90", "XC"}, {"50", "L"},
+    {"40", "XL"},  {"10", "X"},   {"9", "IX"},  {"5", "V"},    {"4", "IV"},  {"1", "I"},   {"0", ""}};
 
 unsigned int FrenchRepublicanCalendar::floorRoman(unsigned int number) const
 {
     unsigned int index = 0;
-    for (index; index < 14; index++) {
-        if (numberMatrix[index][0].toInt() <= number) {
-            return index;
+
+    while (index < sizeof(this->ROMAN_NUMBER_MATRIX)) {
+        if (this->ROMAN_NUMBER_MATRIX[index][0].toInt() <= number) {
+            break;
         }
+        index++;
     }
+
     return index;
 }
 
@@ -132,8 +135,8 @@ const String FrenchRepublicanCalendar::getRomanizedYear() const
 
     while (this->floorRoman(year) < 13) {
         index = this->floorRoman(year);
-        output += numberMatrix[index][1];
-        year -= numberMatrix[index][0].toInt();
+        output += this->ROMAN_NUMBER_MATRIX[index][1];
+        year -= this->ROMAN_NUMBER_MATRIX[index][0].toInt();
     }
 
     return output;

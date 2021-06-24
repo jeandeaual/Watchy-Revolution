@@ -11,6 +11,7 @@ private:
     static const unsigned int REVOLUTION;
     static const char *MONTH_NAMES[];
     static const char *DAY_NAMES[];
+    static const String ROMAN_NUMBER_MATRIX[14][2];
     unsigned int year;
     unsigned int monthNumber;
     unsigned int dayInMonth;

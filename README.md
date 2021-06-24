@@ -2,6 +2,18 @@
 
 [![Build](https://github.com/jeandeaual/Watchy-Revolution/actions/workflows/build.yml/badge.svg)](https://github.com/jeandeaual/Watchy-Revolution/actions/workflows/build.yml)
 
+Shows the current date in the [French Republican calendar](https://en.wikipedia.org/wiki/French_Republican_calendar) (also called the French Revolutionary calendar)
+and the current [decimal time](https://en.wikipedia.org/wiki/Decimal_time).
+
+Leap years are calculated using the Romme method: leap days are inserted at the end of each year divisible by four, except century years not divisible by 400, as part of that year.
+
+## Customization
+
+### Name of the days in French or English
+
+By default the [name of each day in the year](https://en.wikipedia.org/wiki/French_Republican_calendar#Rural_calendar) is written in French. \
+This can be changed to English in the `Revolution::drawDate()` method in [`revolution.cpp`](https://github.com/jeandeaual/Watchy-Revolution/blob/master/revolution.cpp).
+
 ## Build
 
 ### Using [arduino-cli](https://arduino.github.io/arduino-cli/latest/installation/)
@@ -40,3 +52,8 @@
 * Open `Watchy-Revolution.ino`.
 
 * Click on `Upload`.
+
+## Acknowledgements
+
+* Thanks to the [Calculateur](https://git.sr.ht/~jochen/Calculateur) watchface for the idea and the DS3231 RTC Alarm1 usage.
+* This project uses the [Libertinus Serif](https://github.com/alerque/libertinus) font.

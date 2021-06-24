@@ -7,14 +7,26 @@ const unsigned int FrenchRepublicanCalendar::FRUCTIDOR = 12;
 // Leap day
 const unsigned int FrenchRepublicanCalendar::REVOLUTION = 18;
 
+// The font used by the watch has been modified to support French characters using the following mapping:
+// ! → é
+// " → è
+// # → ê
+// $ → ô
+// % → â
+// & → ë
+// ( → ï
+// ) → û
+// * → œ
+// { → É
+// | → Â
+// } → Œ
+// ' → ’
 const char *FrenchRepublicanCalendar::MONTH_NAMES[] = {
-    // "Vendémiaire", "Brumaire",  "Frimaire",  "Nivôse", "Pluviôse", "Ventôse", "Germinal", "Floréal",     "Prairial",
-    // "Messidor",    "Thermidor", "Fructidor", "Vertu",  "Génie",    "Travail", "Opinion",  "Récompenses", "Révolution"};
-    "Vendemiaire", "Brumaire",  "Frimaire",  "Nivose", "Pluviose", "Ventose", "Germinal", "Floreal",     "Prairial",
-    "Messidor",    "Thermidor", "Fructidor", "Vertu",  "Genie",    "Travail", "Opinion",  "Recompenses", "Revolution"};
+    "Vend!miaire", "Brumaire",  "Frimaire",  "Niv$se", "Pluvi$se", "Vent$se", "Germinal", "Flor!al",     "Prairial",
+    "Messidor",    "Thermidor", "Fructidor", "Vertu",  "G!nie",    "Travail", "Opinion",  "R!compenses", "R!volution"};
 
 const char *FrenchRepublicanCalendar::DAY_NAMES[] = {"Primidi", "Duodi",   "Tridi",  "Quartidi", "Quintidi",
-                                                     "Sextidi", "Septidi", "Octidi", "Nonidi",   "Decadi"};
+                                                     "Sextidi", "Septidi", "Octidi", "Nonidi",   "D!cadi"};
 
 FrenchRepublicanCalendar::FrenchRepublicanCalendar() : year(1), monthNumber(1), dayInMonth(1)
 {

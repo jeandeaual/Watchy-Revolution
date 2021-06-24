@@ -1,6 +1,6 @@
 #include "revolution.h"
-#include "fonts/LibertinusSerif_Regular18pt7b.h"
-#include "fonts/LibertinusSerif_Regular39pt7b.h"
+#include "fonts/LibertinusSerif_Regular_French_ASCII16pt7b.h"
+#include "fonts/LibertinusSerif_Regular_Numbers42pt7b.h"
 #include <Arduino.h>
 
 Revolution::Revolution()
@@ -25,7 +25,7 @@ void Revolution::drawTime()
     time[3] = '0' + minutes % 10;
     time[4] = '\0';
 
-    this->display.setFont(&LibertinusSerif_Regular39pt7b);
+    this->display.setFont(&LibertinusSerif_Regular_Numbers42pt7b);
     this->display.setTextWrap(false);
 
     this->drawCenteredString(time, GxEPD2_154_D67::WIDTH / 2, GxEPD2_154_D67::HEIGHT / 2 - 20);
@@ -37,7 +37,7 @@ void Revolution::drawDate()
     const uint16_t y_offset = 32;
     const uint16_t base_y = GxEPD2_154_D67::HEIGHT / 2 + 20;
 
-    this->display.setFont(&LibertinusSerif_Regular18pt7b);
+    this->display.setFont(&LibertinusSerif_Regular_French_ASCII16pt7b);
     this->display.setTextWrap(false);
 
     const char *dayOfWeek = this->calendar.getDayName();

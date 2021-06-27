@@ -475,7 +475,7 @@ unsigned int FrenchRepublicanCalendar::getDay() const
 
 const char *FrenchRepublicanCalendar::getWeekDayName() const
 {
-    return this->WEEK_DAY_NAMES[this->dayInMonth % 10 - 1];
+    return this->dayInMonth % 10 == 0 ? this->WEEK_DAY_NAMES[9] : this->WEEK_DAY_NAMES[this->dayInMonth % 10 - 1];
 }
 
 const char *FrenchRepublicanCalendar::getYearDayName(Language lang) const

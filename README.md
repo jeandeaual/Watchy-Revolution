@@ -2,7 +2,9 @@
 
 [![Build](https://github.com/jeandeaual/Watchy-Revolution/actions/workflows/build.yml/badge.svg)](https://github.com/jeandeaual/Watchy-Revolution/actions/workflows/build.yml)
 
-Shows the current date in the [French Republican calendar](https://en.wikipedia.org/wiki/French_Republican_calendar) (also called the French Revolutionary calendar)
+This is a watch face for the open E-Ink display smartwatch [Watchy](https://watchy.sqfmi.com/).
+
+It shows the current date in the [French Republican calendar](https://en.wikipedia.org/wiki/French_Republican_calendar) (also called the French Revolutionary calendar)
 and the current [decimal time](https://en.wikipedia.org/wiki/Decimal_time).
 
 Leap years are calculated using the Romme method: leap days are inserted at the end of each year divisible by four, except century years not divisible by 400, as part of that year.

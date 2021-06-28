@@ -43,7 +43,8 @@ void increaseMode()
     }
 }
 
-Revolution::Revolution(bool darkMode, float_t handWidth, FrenchRepublicanCalendar::Language dayNameLang) : darkMode(darkMode), handWidth(handWidth), calendar(dayNameLang)
+Revolution::Revolution(bool darkMode, float_t handWidth, FrenchRepublicanCalendar::Language dayNameLang)
+    : calendar(dayNameLang), decimalTime(), darkMode(darkMode), handWidth(handWidth)
 {
 }
 

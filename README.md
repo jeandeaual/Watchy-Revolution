@@ -7,12 +7,24 @@ and the current [decimal time](https://en.wikipedia.org/wiki/Decimal_time).
 
 Leap years are calculated using the Romme method: leap days are inserted at the end of each year divisible by four, except century years not divisible by 400, as part of that year.
 
+## Usage
+
+By pressing up or down (top-right and bottom-right buttons), it is possible to cycle through 4 modes:
+
+1. Digital time with the current date
+1. Digital time only
+1. Analog time with the current date
+1. Analog time only
+
 ## Customization
 
-### Name of the days in French or English
+See [Watchy-Revolution.ino](https://github.com/jeandeaual/Watchy-Revolution/blob/master/Watchy-Revolution.ino#L4) for some customization options:
 
-By default the [name of each day in the year](https://en.wikipedia.org/wiki/French_Republican_calendar#Rural_calendar) is written in French. \
-This can be changed to English in the `Revolution::drawDate()` method in [`revolution.cpp`](https://github.com/jeandeaual/Watchy-Revolution/blob/master/revolution.cpp).
+* Dark or light mode
+* Size of the analog clock hands
+* Name of the days in French or English
+
+    By default the [name of each day in the year](https://en.wikipedia.org/wiki/French_Republican_calendar#Rural_calendar) is written in French.
 
 ## Build
 

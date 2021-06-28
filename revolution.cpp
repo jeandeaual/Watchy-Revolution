@@ -1,10 +1,49 @@
 #include "revolution.h"
 #include "const.h"
-#include "fonts/LibertinusSerif_Regular_French_ASCII12pt7b.h"
+#include "fonts/LibertinusSerif_Regular_French_ASCII13pt7b.h"
 #include "fonts/LibertinusSerif_Regular_Numbers42pt7b.h"
 #include <Arduino.h>
 
-Revolution::Revolution(bool darkMode, float_t handWidth) : darkMode(darkMode), handWidth(handWidth)
+// Store in RTC RAM, otherwise we lose information between different interrupts
+RTC_DATA_ATTR Revolution::Mode mode;
+
+void decreaseMode()
+{
+    switch (mode) {
+    case Revolution::Mode::DigitalDate:
+        mode = Revolution::Mode::Digital;
+        break;
+    case Revolution::Mode::Digital:
+        mode = Revolution::Mode::AnalogDate;
+        break;
+    case Revolution::Mode::AnalogDate:
+        mode = Revolution::Mode::Analog;
+        break;
+    case Revolution::Mode::Analog:
+        mode = Revolution::Mode::DigitalDate;
+        break;
+    }
+}
+
+void increaseMode()
+{
+    switch (mode) {
+    case Revolution::Mode::DigitalDate:
+        mode = Revolution::Mode::Analog;
+        break;
+    case Revolution::Mode::Analog:
+        mode = Revolution::Mode::AnalogDate;
+        break;
+    case Revolution::Mode::AnalogDate:
+        mode = Revolution::Mode::Digital;
+        break;
+    case Revolution::Mode::Digital:
+        mode = Revolution::Mode::DigitalDate;
+        break;
+    }
+}
+
+Revolution::Revolution(bool darkMode, float_t handWidth, FrenchRepublicanCalendar::Language dayNameLang) : darkMode(darkMode), handWidth(handWidth), calendar(dayNameLang)
 {
 }
 
@@ -19,10 +58,10 @@ void Revolution::drawWatchFace()
     }
 
 #ifdef DEBUG
-    Serial.printf("Mode: %d\n", this->mode);
+    Serial.printf("Mode: %d\n", mode);
 #endif
 
-    switch (this->mode) {
+    switch (mode) {
     case Mode::DigitalDate:
         this->drawDate();
     case Mode::Digital:
@@ -42,7 +81,7 @@ void Revolution::drawDigitalTime()
 {
     const unsigned int hours = this->decimalTime.getHours();
     const unsigned int minutes = this->decimalTime.getMinutes();
-    const int yOffset = this->mode == Mode::DigitalDate ? -45 : 0;
+    const int yOffset = mode == Mode::DigitalDate ? -45 : 0;
     char time[5];
 
     time[0] = '0' + hours % 10;
@@ -133,13 +172,13 @@ void Revolution::drawDate()
     static const uint16_t x = GxEPD2_154_D67::WIDTH / 2;
 
     this->display.setTextWrap(false);
-    this->display.setFont(&LibertinusSerif_Regular_French_ASCII12pt7b);
+    this->display.setFont(&LibertinusSerif_Regular_French_ASCII13pt7b);
 
     const char *dayOfWeek = this->calendar.getWeekDayName();
     int day = this->calendar.getDay();
     const char *month = this->calendar.getMonthName();
     const String year = this->calendar.getRomanizedYear();
-    const char *dayOfYear = this->calendar.getYearDayName(FrenchRepublicanCalendar::Language::French);
+    const char *dayOfYear = this->calendar.getYearDayName();
     char *date;
 
     if (this->calendar.sansculottides()) {
@@ -151,7 +190,7 @@ void Revolution::drawDate()
     static const uint16_t y_offset = 22;
     uint16_t base_y;
 
-    switch (this->mode) {
+    switch (mode) {
     case Mode::DigitalDate:
         base_y = GxEPD2_154_D67::HEIGHT / 2 + 12;
         this->drawCenteredString(dayOfWeek, x, base_y);
@@ -250,42 +289,6 @@ void Revolution::resetAlarm()
                        this->decimalTime.getNextAlarmWakeMinutes(), 0, 0);
 }
 
-void Revolution::decreaseMode()
-{
-    switch (this->mode) {
-    case Revolution::Mode::DigitalDate:
-        this->mode = Revolution::Mode::Digital;
-        break;
-    case Revolution::Mode::Digital:
-        this->mode = Revolution::Mode::AnalogDate;
-        break;
-    case Revolution::Mode::AnalogDate:
-        this->mode = Revolution::Mode::Analog;
-        break;
-    case Revolution::Mode::Analog:
-        this->mode = Revolution::Mode::DigitalDate;
-        break;
-    }
-}
-
-void Revolution::increaseMode()
-{
-    switch (this->mode) {
-    case Revolution::Mode::DigitalDate:
-        this->mode = Revolution::Mode::Analog;
-        break;
-    case Revolution::Mode::Analog:
-        this->mode = Revolution::Mode::AnalogDate;
-        break;
-    case Revolution::Mode::AnalogDate:
-        this->mode = Revolution::Mode::Digital;
-        break;
-    case Revolution::Mode::Digital:
-        this->mode = Revolution::Mode::DigitalDate;
-        break;
-    }
-}
-
 // Reimplemented from Watchy to use ALARM1 instead of ALARM2
 void Revolution::handleButtonPress()
 {
@@ -339,10 +342,10 @@ void Revolution::handleButtonPress()
     } else if (wakeupBit & UP_BTN_MASK) {
         // Up button
         if (guiState == WATCHFACE_STATE) {
-            this->increaseMode();
+            increaseMode();
 
 #ifdef DEBUG
-    Serial.printf("Switching to watchface mode %d\n", this->mode);
+    Serial.printf("Switching to watchface mode %d\n", mode);
 #endif
 
             // Resets the alarm flag in the RTC
@@ -359,10 +362,10 @@ void Revolution::handleButtonPress()
     } else if (wakeupBit & DOWN_BTN_MASK) {
         // Down Button
         if (guiState == WATCHFACE_STATE) {
-            this->decreaseMode();
+            decreaseMode();
 
 #ifdef DEBUG
-    Serial.printf("Switching to watchface mode %d\n", this->mode);
+    Serial.printf("Switching to watchface mode %d\n", mode);
 #endif
 
             // Resets the alarm flag in the RTC
@@ -440,10 +443,10 @@ void Revolution::handleButtonPress()
             } else if (digitalRead(UP_BTN_PIN) == 1) {
                 lastTimeout = millis();
                 if (guiState == WATCHFACE_STATE) {
-                    this->increaseMode();
+                    increaseMode();
 
         #ifdef DEBUG
-            Serial.printf("Switching to watchface mode %d\n", this->mode);
+            Serial.printf("Switching to watchface mode %d\n", mode);
         #endif
 
                     // Resets the alarm flag in the RTC
@@ -463,10 +466,10 @@ void Revolution::handleButtonPress()
             } else if (digitalRead(DOWN_BTN_PIN) == 1) {
                 lastTimeout = millis();
                 if (guiState == WATCHFACE_STATE) {
-                    this->decreaseMode();
+                    decreaseMode();
 
         #ifdef DEBUG
-            Serial.printf("Switching to watchface mode %d\n", this->mode);
+            Serial.printf("Switching to watchface mode %d\n", mode);
         #endif
 
                     // Resets the alarm flag in the RTC

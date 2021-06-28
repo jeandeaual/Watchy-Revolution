@@ -395,7 +395,7 @@ const char *FrenchRepublicanCalendar::YEAR_DAY_NAMES[366][2] = {{"Raisin", "Grap
                                                                 {"R!compenses", "Honors"},
                                                                 {"R!volution", "Revolution"}};
 
-FrenchRepublicanCalendar::FrenchRepublicanCalendar() : year(1), monthNumber(1), dayInMonth(1)
+FrenchRepublicanCalendar::FrenchRepublicanCalendar(Language lang) : lang(lang), year(1), monthNumber(1), dayInMonth(1)
 {
 }
 
@@ -478,11 +478,11 @@ const char *FrenchRepublicanCalendar::getWeekDayName() const
     return this->dayInMonth % 10 == 0 ? this->WEEK_DAY_NAMES[9] : this->WEEK_DAY_NAMES[this->dayInMonth % 10 - 1];
 }
 
-const char *FrenchRepublicanCalendar::getYearDayName(Language lang) const
+const char *FrenchRepublicanCalendar::getYearDayName() const
 {
     const unsigned int dayIndex = (this->monthNumber - 1) * 30 + dayInMonth - 1;
 
-    switch (lang) {
+    switch (this->lang) {
     case Language::English:
         return this->YEAR_DAY_NAMES[dayIndex][1];
     default:

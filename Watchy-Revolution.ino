@@ -1,7 +1,7 @@
 #include "const.h"
 #include "revolution.h"
 
-Revolution watchy;
+Revolution watchy(true, 2.0);
 
 void setup()
 {

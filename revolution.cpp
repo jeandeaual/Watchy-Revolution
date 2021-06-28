@@ -1,22 +1,47 @@
 #include "revolution.h"
+#include "const.h"
+#include "fonts/LibertinusSerif_Regular_French_ASCII12pt7b.h"
 #include "fonts/LibertinusSerif_Regular_French_ASCII16pt7b.h"
 #include "fonts/LibertinusSerif_Regular_Numbers42pt7b.h"
 #include <Arduino.h>
 
-Revolution::Revolution()
+Revolution::Revolution(bool darkMode, float_t handWidth) : darkMode(darkMode), handWidth(handWidth)
 {
 }
 
 void Revolution::drawWatchFace()
 {
-    this->drawTime();
-    this->drawDate();
+    if (this->darkMode) {
+        this->display.fillScreen(GxEPD_BLACK);
+        this->display.setTextColor(GxEPD_WHITE);
+    } else {
+        this->display.fillScreen(GxEPD_WHITE);
+        this->display.setTextColor(GxEPD_BLACK);
+    }
+
+#ifdef DEBUG
+    Serial.printf("Mode: %d\n", this->mode);
+#endif
+
+    switch (this->mode) {
+    case Mode::DigitalDate:
+        this->drawDate();
+    case Mode::Digital:
+        this->drawDigitalTime();
+        break;
+    case Mode::AnalogDate:
+        this->drawDate();
+    case Mode::Analog:
+        this->drawAnalogTime();
+        break;
+    }
 }
 
-void Revolution::drawTime()
+void Revolution::drawDigitalTime()
 {
     const unsigned int hours = this->decimalTime.getHours();
     const unsigned int minutes = this->decimalTime.getMinutes();
+    const int yOffset = this->mode == Mode::DigitalDate ? -60 : 0;
     char time[5];
 
     time[0] = '0' + hours % 10;
@@ -28,16 +53,84 @@ void Revolution::drawTime()
     this->display.setFont(&LibertinusSerif_Regular_Numbers42pt7b);
     this->display.setTextWrap(false);
 
-    this->drawCenteredString(time, GxEPD2_154_D67::WIDTH / 2, GxEPD2_154_D67::HEIGHT / 2 - 35);
+    this->drawCenteredString(time, GxEPD2_154_D67::WIDTH / 2, GxEPD2_154_D67::HEIGHT / 2 + yOffset);
+}
+
+void drawHand(GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> &display, int16_t len, float angle, float_t handWidth,
+              uint16_t handColor)
+{
+    static const int16_t xc = GxEPD2_154_D67::WIDTH / 2;
+    static const int16_t yc = GxEPD2_154_D67::HEIGHT / 2;
+
+    int16_t xe = floor(-len * sin(angle));
+    int16_t ye = floor(-len * cos(angle));
+
+    const int16_t xb = round(-ye / (len / handWidth));
+    const int16_t yb = round(xe / (len / handWidth));
+
+    xe += xc;
+    ye += yc;
+
+    display.fillTriangle(xc - xb, yc - yb, xc + xb, yc + yb, xe + xb, ye + yb, handColor);
+    display.fillTriangle(xc - xb, yc - yb, xe + xb, ye + yb, xe - xb, ye - yb, handColor);
+}
+
+void Revolution::drawAnalogTime()
+{
+    unsigned int hours = this->decimalTime.getHours();
+    unsigned int minutes = this->decimalTime.getMinutes();
+
+    const uint16_t handColor = darkMode ? GxEPD_WHITE : GxEPD_BLACK;
+
+    // Hours
+    drawHand(display, 60, (hours + minutes / 100.0) / 10.0 * -TWO_PI, this->handWidth, handColor);
+    // Minutes
+    drawHand(display, 90, minutes / 100.0 * -TWO_PI, this->handWidth, handColor);
+
+    static const int16_t innerTickLenght = GxEPD2_154_D67::WIDTH / 20;
+    static const int16_t centerX = GxEPD2_154_D67::WIDTH / 2;
+    static const int16_t centerY = GxEPD2_154_D67::HEIGHT / 2;
+    static const int16_t innerTickRadius = centerX - innerTickLenght;
+    static const int16_t outerTickRadius = centerX;
+
+    // Draw the ticks on the sides of the screen
+    for (unsigned int tickIndex = 0; tickIndex < 10; tickIndex++) {
+        unsigned int offset;
+
+        switch (tickIndex) {
+        case 2:
+        case 3:
+        case 7:
+        case 8:
+            offset = innerTickLenght / 2;
+            break;
+        case 1:
+        case 4:
+        case 6:
+        case 9:
+            offset = innerTickLenght * 2 + innerTickLenght / 5;
+            break;
+        default:
+            offset = 0;
+            break;
+        }
+
+        const float_t tickRotation = tickIndex * TWO_PI / 10;
+        const float_t tickSin = sin(tickRotation);
+        const float_t tickCos = cos(tickRotation);
+        const float_t innerX = tickSin * (innerTickRadius + offset);
+        const float_t innerY = -tickCos * (innerTickRadius + offset);
+        const float_t outerX = tickSin * (outerTickRadius + offset);
+        const float_t outerY = -tickCos * (outerTickRadius + offset);
+
+        this->display.drawLine(centerX + innerX, centerY + innerY, centerX + outerX, centerY + outerY, handColor);
+    }
 }
 
 void Revolution::drawDate()
 {
-    const uint16_t x = GxEPD2_154_D67::WIDTH / 2;
-    const uint16_t y_offset = 28;
-    const uint16_t base_y = GxEPD2_154_D67::HEIGHT / 2;
+    static const uint16_t x = GxEPD2_154_D67::WIDTH / 2;
 
-    this->display.setFont(&LibertinusSerif_Regular_French_ASCII16pt7b);
     this->display.setTextWrap(false);
 
     const char *dayOfWeek = this->calendar.getWeekDayName();
@@ -53,10 +146,30 @@ void Revolution::drawDate()
         asprintf(&date, "%d %s", day, month);
     }
 
-    this->drawCenteredString(dayOfWeek, x, base_y);
-    this->drawCenteredString(date, x, base_y + y_offset);
-    this->drawCenteredString(year.c_str(), x, base_y + y_offset * 2);
-    this->drawCenteredString(dayOfYear, x, base_y + y_offset * 3);
+    uint16_t y_offset;
+    uint16_t base_y;
+
+    switch (this->mode) {
+    case Mode::DigitalDate:
+        y_offset = 28;
+        base_y = GxEPD2_154_D67::HEIGHT / 2 - 10;
+        this->display.setFont(&LibertinusSerif_Regular_French_ASCII12pt7b);
+        this->drawCenteredString(dayOfWeek, x, base_y);
+        this->drawCenteredString(date, x, base_y + y_offset);
+        this->drawCenteredString(year.c_str(), x, base_y + y_offset * 2);
+        this->drawCenteredString(dayOfYear, x, base_y + y_offset * 3);
+        break;
+    case Mode::AnalogDate:
+        y_offset = 22;
+        base_y = GxEPD2_154_D67::HEIGHT / 2 - 70;
+        this->display.setFont(&LibertinusSerif_Regular_French_ASCII12pt7b);
+        this->drawCenteredString(dayOfWeek, x, base_y);
+        this->drawCenteredString(date, x, base_y + y_offset);
+        this->drawCenteredString(year.c_str(), x, base_y + y_offset * 2);
+        base_y += 120;
+        this->drawCenteredString(dayOfYear, x, base_y + y_offset);
+        break;
+    }
 
     free(date);
 }
@@ -67,7 +180,7 @@ void Revolution::drawCenteredString(const char *str, const int x, const int y)
     uint16_t w, h;
 
     this->display.getTextBounds(str, x, y, &x1, &y1, &w, &h);
-    this->display.setCursor(x - w / 2, y);
+    this->display.setCursor(x - w / 2, y + h / 2);
     this->display.print(str);
 }
 
@@ -101,12 +214,10 @@ void Revolution::init(String datetime)
     case ESP_SLEEP_WAKEUP_EXT0:   // RTC Alarm
         this->RTC.alarm(ALARM_1); // Reset the alarm flag in the RTC
         if (guiState == WATCHFACE_STATE) {
-            this->RTC.read(this->currentTime);
-            this->calendar.update(makeTime(this->currentTime));
-            this->decimalTime.update(this->currentTime);
-            this->RTC.setAlarm(ALM1_MATCH_MINUTES, this->decimalTime.getNextAlarmWakeSeconds(),
-                               this->decimalTime.getNextAlarmWakeMinutes(), 0, 0);
-            this->showWatchFace(true); // Partial updates on tick
+            // Resets the alarm flag in the RTC
+            this->resetAlarm();
+            // Partial updates on tick
+            this->showWatchFace(true);
         }
         break;
     case ESP_SLEEP_WAKEUP_EXT1: // Button press
@@ -129,6 +240,44 @@ void Revolution::init(String datetime)
     deepSleep();
 }
 
+Revolution::Mode decreaseMode(Revolution::Mode mode)
+{
+    switch (mode) {
+    case Revolution::Mode::DigitalDate:
+        return Revolution::Mode::Digital;
+    case Revolution::Mode::Digital:
+        return Revolution::Mode::AnalogDate;
+    case Revolution::Mode::AnalogDate:
+        return Revolution::Mode::Analog;
+    default:
+        return Revolution::Mode::DigitalDate;
+    }
+}
+
+Revolution::Mode increaseMode(Revolution::Mode mode)
+{
+    switch (mode) {
+    case Revolution::Mode::DigitalDate:
+        return Revolution::Mode::Analog;
+    case Revolution::Mode::Analog:
+        return Revolution::Mode::AnalogDate;
+    case Revolution::Mode::AnalogDate:
+        return Revolution::Mode::Digital;
+    default:
+        return Revolution::Mode::DigitalDate;
+    }
+}
+
+void Revolution::resetAlarm()
+{
+    this->RTC.alarm(ALARM_1);
+    this->RTC.read(this->currentTime);
+    this->calendar.update(makeTime(this->currentTime));
+    this->decimalTime.update(this->currentTime);
+    this->RTC.setAlarm(ALM1_MATCH_MINUTES, this->decimalTime.getNextAlarmWakeSeconds(),
+                       this->decimalTime.getNextAlarmWakeMinutes(), 0, 0);
+}
+
 // Reimplemented from Watchy to use ALARM1 instead of ALARM2
 void Revolution::handleButtonPress()
 {
@@ -137,7 +286,7 @@ void Revolution::handleButtonPress()
         // Menu button
         if (guiState == WATCHFACE_STATE) {
             // Enter menu state if coming from watch face
-            showMenu(menuIndex, false);
+            this->showMenu(menuIndex, false);
         } else if (guiState == MAIN_MENU_STATE) {
             // If already in menu, then select menu item
             switch (menuIndex) {
@@ -169,13 +318,8 @@ void Revolution::handleButtonPress()
         // Back button
         if (guiState == MAIN_MENU_STATE) {
             // Exit to watch face if already in menu
-            // Resets the alarm flag in the RTC
-            this->RTC.alarm(ALARM_1);
-            this->RTC.read(this->currentTime);
-            this->calendar.update(makeTime(this->currentTime));
-            this->decimalTime.update(this->currentTime);
-            this->RTC.setAlarm(ALM1_MATCH_MINUTES, this->decimalTime.getNextAlarmWakeSeconds(),
-                               this->decimalTime.getNextAlarmWakeMinutes(), 0, 0);
+            // Reset the alarm flag in the RTC
+            this->resetAlarm();
             this->showWatchFace(false);
         } else if (guiState == APP_STATE) {
             // Exit to menu if already in app~
@@ -186,7 +330,17 @@ void Revolution::handleButtonPress()
         }
     } else if (wakeupBit & UP_BTN_MASK) {
         // Up button
-        if (guiState == MAIN_MENU_STATE) {
+        if (guiState == WATCHFACE_STATE) {
+            this->mode = increaseMode(this->mode);
+
+#ifdef DEBUG
+    Serial.printf("Switching to watchface mode %d\n", this->mode);
+#endif
+
+            // Resets the alarm flag in the RTC
+            this->resetAlarm();
+            this->showWatchFace(false);
+        } else if (guiState == MAIN_MENU_STATE) {
             // Decrement menu index
             menuIndex--;
             if (menuIndex < 0) {
@@ -194,10 +348,19 @@ void Revolution::handleButtonPress()
             }
             this->showMenu(menuIndex, true);
         }
-    }
-    // Down Button
-    else if (wakeupBit & DOWN_BTN_MASK) {
-        if (guiState == MAIN_MENU_STATE) {
+    } else if (wakeupBit & DOWN_BTN_MASK) {
+        // Down Button
+        if (guiState == WATCHFACE_STATE) {
+            this->mode = decreaseMode(this->mode);
+
+#ifdef DEBUG
+    Serial.printf("Switching to watchface mode %d\n", this->mode);
+#endif
+
+            // Resets the alarm flag in the RTC
+            this->resetAlarm();
+            this->showWatchFace(false);
+        } else if (guiState == MAIN_MENU_STATE) {
             // Increment menu index
             menuIndex++;
             if (menuIndex > MENU_LENGTH - 1) {
@@ -252,13 +415,9 @@ void Revolution::handleButtonPress()
                 if (guiState == MAIN_MENU_STATE) {
                     // Exit to watch face if already in menu
                     // Resets the alarm flag in the RTC
-                    this->RTC.alarm(ALARM_1);
-                    this->RTC.read(this->currentTime);
-                    this->calendar.update(makeTime(this->currentTime));
-                    this->decimalTime.update(this->currentTime);
-                    this->RTC.setAlarm(ALM1_MATCH_MINUTES, this->decimalTime.getNextAlarmWakeSeconds(),
-                                       this->decimalTime.getNextAlarmWakeMinutes(), 0, 0);
+                    this->resetAlarm();
                     this->showWatchFace(false);
+
                     // Leave loop
                     break;
                 } else if (guiState == APP_STATE) {
@@ -270,7 +429,20 @@ void Revolution::handleButtonPress()
                 }
             } else if (digitalRead(UP_BTN_PIN) == 1) {
                 lastTimeout = millis();
-                if (guiState == MAIN_MENU_STATE) {
+                if (guiState == WATCHFACE_STATE) {
+                    this->mode = increaseMode(this->mode);
+
+        #ifdef DEBUG
+            Serial.printf("Switching to watchface mode %d\n", this->mode);
+        #endif
+
+                    // Resets the alarm flag in the RTC
+                    this->resetAlarm();
+                    this->showWatchFace(false);
+
+                    // Leave loop
+                    break;
+                } else if (guiState == MAIN_MENU_STATE) {
                     // Decrement menu index
                     menuIndex--;
                     if (menuIndex < 0) {
@@ -280,7 +452,20 @@ void Revolution::handleButtonPress()
                 }
             } else if (digitalRead(DOWN_BTN_PIN) == 1) {
                 lastTimeout = millis();
-                if (guiState == MAIN_MENU_STATE) {
+                if (guiState == WATCHFACE_STATE) {
+                    this->mode = decreaseMode(this->mode);
+
+        #ifdef DEBUG
+            Serial.printf("Switching to watchface mode %d\n", this->mode);
+        #endif
+
+                    // Resets the alarm flag in the RTC
+                    this->resetAlarm();
+                    this->showWatchFace(false);
+
+                    // Leave loop
+                    break;
+                } else if (guiState == MAIN_MENU_STATE) {
                     // Increment menu index
                     menuIndex++;
                     if (menuIndex > MENU_LENGTH - 1) {

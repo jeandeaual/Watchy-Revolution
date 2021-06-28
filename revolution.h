@@ -37,6 +37,8 @@ private:
     void drawDate();
     void drawCenteredString(const char *str, const int x, const int y);
     void resetAlarm();
+    void decreaseMode();
+    void increaseMode();
     // Reimplemented from Watchy to use ALARM1 instead of ALARM2
     void _rtcConfig(String datetime);
 };

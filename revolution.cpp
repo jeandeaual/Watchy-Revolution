@@ -1,7 +1,6 @@
 #include "revolution.h"
 #include "const.h"
 #include "fonts/LibertinusSerif_Regular_French_ASCII12pt7b.h"
-#include "fonts/LibertinusSerif_Regular_French_ASCII16pt7b.h"
 #include "fonts/LibertinusSerif_Regular_Numbers42pt7b.h"
 #include <Arduino.h>
 
@@ -34,6 +33,8 @@ void Revolution::drawWatchFace()
     case Mode::Analog:
         this->drawAnalogTime();
         break;
+    default:
+        break;
     }
 }
 
@@ -41,7 +42,7 @@ void Revolution::drawDigitalTime()
 {
     const unsigned int hours = this->decimalTime.getHours();
     const unsigned int minutes = this->decimalTime.getMinutes();
-    const int yOffset = this->mode == Mode::DigitalDate ? -60 : 0;
+    const int yOffset = this->mode == Mode::DigitalDate ? -45 : 0;
     char time[5];
 
     time[0] = '0' + hours % 10;
@@ -80,7 +81,7 @@ void Revolution::drawAnalogTime()
     unsigned int hours = this->decimalTime.getHours();
     unsigned int minutes = this->decimalTime.getMinutes();
 
-    const uint16_t handColor = darkMode ? GxEPD_WHITE : GxEPD_BLACK;
+    const uint16_t handColor = this->darkMode ? GxEPD_WHITE : GxEPD_BLACK;
 
     // Hours
     drawHand(display, 60, (hours + minutes / 100.0) / 10.0 * -TWO_PI, this->handWidth, handColor);
@@ -132,6 +133,7 @@ void Revolution::drawDate()
     static const uint16_t x = GxEPD2_154_D67::WIDTH / 2;
 
     this->display.setTextWrap(false);
+    this->display.setFont(&LibertinusSerif_Regular_French_ASCII12pt7b);
 
     const char *dayOfWeek = this->calendar.getWeekDayName();
     int day = this->calendar.getDay();
@@ -146,23 +148,19 @@ void Revolution::drawDate()
         asprintf(&date, "%d %s", day, month);
     }
 
-    uint16_t y_offset;
+    static const uint16_t y_offset = 22;
     uint16_t base_y;
 
     switch (this->mode) {
     case Mode::DigitalDate:
-        y_offset = 28;
-        base_y = GxEPD2_154_D67::HEIGHT / 2 - 10;
-        this->display.setFont(&LibertinusSerif_Regular_French_ASCII12pt7b);
+        base_y = GxEPD2_154_D67::HEIGHT / 2 + 12;
         this->drawCenteredString(dayOfWeek, x, base_y);
         this->drawCenteredString(date, x, base_y + y_offset);
         this->drawCenteredString(year.c_str(), x, base_y + y_offset * 2);
         this->drawCenteredString(dayOfYear, x, base_y + y_offset * 3);
         break;
     case Mode::AnalogDate:
-        y_offset = 22;
         base_y = GxEPD2_154_D67::HEIGHT / 2 - 70;
-        this->display.setFont(&LibertinusSerif_Regular_French_ASCII12pt7b);
         this->drawCenteredString(dayOfWeek, x, base_y);
         this->drawCenteredString(date, x, base_y + y_offset);
         this->drawCenteredString(year.c_str(), x, base_y + y_offset * 2);
@@ -242,34 +240,6 @@ void Revolution::init(String datetime)
     deepSleep();
 }
 
-Revolution::Mode decreaseMode(Revolution::Mode mode)
-{
-    switch (mode) {
-    case Revolution::Mode::DigitalDate:
-        return Revolution::Mode::Digital;
-    case Revolution::Mode::Digital:
-        return Revolution::Mode::AnalogDate;
-    case Revolution::Mode::AnalogDate:
-        return Revolution::Mode::Analog;
-    default:
-        return Revolution::Mode::DigitalDate;
-    }
-}
-
-Revolution::Mode increaseMode(Revolution::Mode mode)
-{
-    switch (mode) {
-    case Revolution::Mode::DigitalDate:
-        return Revolution::Mode::Analog;
-    case Revolution::Mode::Analog:
-        return Revolution::Mode::AnalogDate;
-    case Revolution::Mode::AnalogDate:
-        return Revolution::Mode::Digital;
-    default:
-        return Revolution::Mode::DigitalDate;
-    }
-}
-
 void Revolution::resetAlarm()
 {
     this->RTC.alarm(ALARM_1);
@@ -278,6 +248,42 @@ void Revolution::resetAlarm()
     this->decimalTime.update(this->currentTime);
     this->RTC.setAlarm(ALM1_MATCH_MINUTES, this->decimalTime.getNextAlarmWakeSeconds(),
                        this->decimalTime.getNextAlarmWakeMinutes(), 0, 0);
+}
+
+void Revolution::decreaseMode()
+{
+    switch (this->mode) {
+    case Revolution::Mode::DigitalDate:
+        this->mode = Revolution::Mode::Digital;
+        break;
+    case Revolution::Mode::Digital:
+        this->mode = Revolution::Mode::AnalogDate;
+        break;
+    case Revolution::Mode::AnalogDate:
+        this->mode = Revolution::Mode::Analog;
+        break;
+    case Revolution::Mode::Analog:
+        this->mode = Revolution::Mode::DigitalDate;
+        break;
+    }
+}
+
+void Revolution::increaseMode()
+{
+    switch (this->mode) {
+    case Revolution::Mode::DigitalDate:
+        this->mode = Revolution::Mode::Analog;
+        break;
+    case Revolution::Mode::Analog:
+        this->mode = Revolution::Mode::AnalogDate;
+        break;
+    case Revolution::Mode::AnalogDate:
+        this->mode = Revolution::Mode::Digital;
+        break;
+    case Revolution::Mode::Digital:
+        this->mode = Revolution::Mode::DigitalDate;
+        break;
+    }
 }
 
 // Reimplemented from Watchy to use ALARM1 instead of ALARM2
@@ -333,7 +339,7 @@ void Revolution::handleButtonPress()
     } else if (wakeupBit & UP_BTN_MASK) {
         // Up button
         if (guiState == WATCHFACE_STATE) {
-            this->mode = increaseMode(this->mode);
+            this->increaseMode();
 
 #ifdef DEBUG
     Serial.printf("Switching to watchface mode %d\n", this->mode);
@@ -353,7 +359,7 @@ void Revolution::handleButtonPress()
     } else if (wakeupBit & DOWN_BTN_MASK) {
         // Down Button
         if (guiState == WATCHFACE_STATE) {
-            this->mode = decreaseMode(this->mode);
+            this->decreaseMode();
 
 #ifdef DEBUG
     Serial.printf("Switching to watchface mode %d\n", this->mode);
@@ -375,10 +381,12 @@ void Revolution::handleButtonPress()
     /***************** Fast menu *****************/
     bool timeout = false;
     long lastTimeout = millis();
+
     pinMode(MENU_BTN_PIN, INPUT);
     pinMode(BACK_BTN_PIN, INPUT);
     pinMode(UP_BTN_PIN, INPUT);
     pinMode(DOWN_BTN_PIN, INPUT);
+
     while (!timeout) {
         if (millis() - lastTimeout > 5000) {
             timeout = true;
@@ -432,7 +440,7 @@ void Revolution::handleButtonPress()
             } else if (digitalRead(UP_BTN_PIN) == 1) {
                 lastTimeout = millis();
                 if (guiState == WATCHFACE_STATE) {
-                    this->mode = increaseMode(this->mode);
+                    this->increaseMode();
 
         #ifdef DEBUG
             Serial.printf("Switching to watchface mode %d\n", this->mode);
@@ -455,7 +463,7 @@ void Revolution::handleButtonPress()
             } else if (digitalRead(DOWN_BTN_PIN) == 1) {
                 lastTimeout = millis();
                 if (guiState == WATCHFACE_STATE) {
-                    this->mode = decreaseMode(this->mode);
+                    this->decreaseMode();
 
         #ifdef DEBUG
             Serial.printf("Switching to watchface mode %d\n", this->mode);

@@ -169,6 +169,8 @@ void Revolution::drawDate()
         base_y += 120;
         this->drawCenteredString(dayOfYear, x, base_y + y_offset);
         break;
+    default:
+        break;
     }
 
     free(date);

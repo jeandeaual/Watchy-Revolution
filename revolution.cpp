@@ -43,8 +43,8 @@ void increaseMode()
     }
 }
 
-Revolution::Revolution(bool darkMode, float_t handWidth, FrenchRepublicanCalendar::Language dayNameLang)
-    : calendar(dayNameLang), decimalTime(), darkMode(darkMode), handWidth(handWidth)
+Revolution::Revolution(bool darkMode, bool yearRoman, float_t handWidth, FrenchRepublicanCalendar::Language dayNameLang)
+    : calendar(dayNameLang), decimalTime(), darkMode(darkMode), yearRoman(yearRoman), handWidth(handWidth)
 {
 }
 
@@ -178,7 +178,7 @@ void Revolution::drawDate()
     const char *dayOfWeek = this->calendar.getWeekDayName();
     int day = this->calendar.getDay();
     const char *month = this->calendar.getMonthName();
-    const String year = this->calendar.getRomanizedYear();
+    const String year = this->yearRoman ? this->calendar.getRomanizedYear() : String(this->calendar.getYear());
     const char *dayOfYear = this->calendar.getYearDayName();
     char *date;
 

@@ -11,6 +11,7 @@ private:
     FrenchRepublicanCalendar calendar;
     DecimalTime decimalTime;
     const bool darkMode;
+    const bool yearRoman;
     const float_t handWidth;
 
 public:
@@ -22,7 +23,7 @@ public:
         Analog
     };
 
-    Revolution(bool darkMode, float_t handWidth, FrenchRepublicanCalendar::Language dayNameLang);
+    Revolution(bool darkMode, bool yearRoman, float_t handWidth, FrenchRepublicanCalendar::Language dayNameLang);
     void drawWatchFace() override;
     // Reimplemented from Watchy to use ALARM1 instead of ALARM2
     void init(String datetime = "");

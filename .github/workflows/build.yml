@@ -9,6 +9,8 @@ on:
       - '**.h'
       - '.github/workflows/build.yml'
   push:
+    tags:
+      - 'v*'
     branches:
       - master
     paths:
@@ -20,6 +22,7 @@ env:
   ARTIFACT_FOLDER: artifact
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the code
@@ -49,7 +52,7 @@ jobs:
         env:
           FOLDER: ${{ env.ARTIFACT_FOLDER }}
           SKETCH: ${{ github.event.repository.name }}
-      - name: Get the short Git SHA
+      - name: Get the short commit SHA
         id: slug
         run: echo "::set-output name=sha7::$(echo "${GITHUB_SHA}" | cut -c1-7)"
       - name: Upload
@@ -57,3 +60,39 @@ jobs:
         with:
           name: ${{ github.event.repository.name }}-${{ steps.slug.outputs.sha7 }}
           path: ${{ env.ARTIFACT_FOLDER }}
+  release:
+    # Only release when pushing a tag
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    name: Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: Get the short commit SHA
+        id: slug
+        run: echo "::set-output name=sha7::$(echo ${GITHUB_SHA} | cut -c1-7)"
+      - uses: olegtarasov/get-tag@v2.1
+        id: tagName
+        with:
+          tagRegex: "v(?<version>.*)"
+      - name: Download the build artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ github.event.repository.name }}-${{ steps.slug.outputs.sha7 }}
+          path: ${{ env.ARTIFACT_FOLDER }}
+      - name: Archive the build artifact
+        run: cd "${FOLDER}" && zip -9 -r "../${FILENAME}" *
+        env:
+          FOLDER: ${{ env.ARTIFACT_FOLDER }}
+          FILENAME: ${{ github.event.repository.name }}-${{ steps.tagName.outputs.version }}.zip
+      - name: Create a new release
+        uses: ncipollo/release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          artifacts: "*.zip"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: true

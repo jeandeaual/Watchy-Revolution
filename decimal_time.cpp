@@ -93,12 +93,20 @@ void DecimalTime::update(const tmElements_t &currentTime)
 
 unsigned int DecimalTime::getHours() const
 {
+#ifdef DEMO
+    return 2;
+#else
     return this->decimalMinutes / 100;
+#endif
 }
 
 unsigned int DecimalTime::getMinutes() const
 {
+#ifdef DEMO
+    return 80;
+#else
     return this->decimalMinutes % 100;
+#endif
 }
 
 unsigned int DecimalTime::getNextAlarmWakeMinutes() const

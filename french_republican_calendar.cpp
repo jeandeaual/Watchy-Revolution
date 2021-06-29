@@ -461,25 +461,40 @@ int FrenchRepublicanCalendar::daysInFrenchMonth(unsigned int year, unsigned int 
 
 const char *FrenchRepublicanCalendar::getMonthName() const
 {
+#ifdef DEMO
+    return this->MONTH_NAMES[0];
+#else
     if (this->monthNumber < 1 || this->monthNumber > sizeof(this->MONTH_NAMES)) {
         return "";
     }
 
     return this->MONTH_NAMES[this->monthNumber - 1];
+#endif
 }
 
 unsigned int FrenchRepublicanCalendar::getDay() const
 {
+#ifdef DEMO
+    return 1;
+#else
     return this->dayInMonth;
+#endif
 }
 
 const char *FrenchRepublicanCalendar::getWeekDayName() const
 {
+#ifdef DEMO
+    return this->WEEK_DAY_NAMES[0];
+#else
     return this->dayInMonth % 10 == 0 ? this->WEEK_DAY_NAMES[9] : this->WEEK_DAY_NAMES[this->dayInMonth % 10 - 1];
+#endif
 }
 
 const char *FrenchRepublicanCalendar::getYearDayName() const
 {
+#ifdef DEMO
+    return this->YEAR_DAY_NAMES[0][0];
+#else
     const unsigned int dayIndex = (this->monthNumber - 1) * 30 + dayInMonth - 1;
 
     switch (this->lang) {
@@ -488,6 +503,7 @@ const char *FrenchRepublicanCalendar::getYearDayName() const
     default:
         return this->YEAR_DAY_NAMES[dayIndex][0];
     }
+#endif
 }
 
 bool FrenchRepublicanCalendar::sansculottides() const

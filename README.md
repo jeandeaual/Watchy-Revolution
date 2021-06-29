@@ -1,5 +1,7 @@
 # Revolution Watchface for [Watchy](https://watchy.sqfmi.com/)
 
+![Watchface GIF](screenshots/watchfaces.gif)
+
 [![Build](https://github.com/jeandeaual/Watchy-Revolution/actions/workflows/build.yml/badge.svg)](https://github.com/jeandeaual/Watchy-Revolution/actions/workflows/build.yml)
 
 This is a watch face for the open E-Ink display smartwatch [Watchy](https://watchy.sqfmi.com/).
@@ -14,9 +16,20 @@ Leap years are calculated using the Romme method: leap days are inserted at the 
 By pressing up or down (top-right and bottom-right buttons), it is possible to cycle through 4 modes:
 
 1. Digital time with the current date
+
+    ![Digital date watchface screenshot](screenshots/digital-date.png)
+
 1. Digital time only
+
+    ![Digital watchface screenshot](screenshots/digital.png)
+
 1. Analog time with the current date
+
+    ![Analog date watchface screenshot](screenshots/analog-date.png)
+
 1. Analog time only
+
+    ![Analog watchface screenshot](screenshots/analog.png)
 
 ## Customization
 

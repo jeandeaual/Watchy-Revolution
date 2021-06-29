@@ -290,7 +290,7 @@ void Revolution::resetAlarm()
                        this->decimalTime.getNextAlarmWakeMinutes(), 0, 0);
 }
 
-// Reimplemented from Watchy to use ALARM1 instead of ALARM2
+// Reimplemented from Watchy to use ALARM1 instead of ALARM2 and to switch between modes
 void Revolution::handleButtonPress()
 {
     uint64_t wakeupBit = esp_sleep_get_ext1_wakeup_status();

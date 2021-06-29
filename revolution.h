@@ -22,11 +22,11 @@ public:
         Analog
     };
 
-    Revolution(bool darkMode, float_t handWidth, FrenchRepublicanCalendar::Language dayNameLanguage);
+    Revolution(bool darkMode, float_t handWidth, FrenchRepublicanCalendar::Language dayNameLang);
     void drawWatchFace() override;
     // Reimplemented from Watchy to use ALARM1 instead of ALARM2
     void init(String datetime = "");
-    // Reimplemented from Watchy to use ALARM1 instead of ALARM2
+    // Reimplemented from Watchy to use ALARM1 instead of ALARM2 and to switch between modes
     void handleButtonPress();
 
 private:

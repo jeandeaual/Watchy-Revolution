@@ -181,6 +181,6 @@ const GFXglyph LibertinusSerif_Regular_Numbers42pt7bGlyphs[] PROGMEM = {
 
 const GFXfont LibertinusSerif_Regular_Numbers42pt7b PROGMEM = {
     (uint8_t  *)LibertinusSerif_Regular_Numbers42pt7bBitmaps,
-    (GFXglyph *)LibertinusSerif_Regular_Numbers42pt7bGlyphs, 0x30, 0x3A,  94 };
+    (GFXglyph *)LibertinusSerif_Regular_Numbers42pt7bGlyphs, 0x30, 0x3A, 94 };
 
 // clang-format on

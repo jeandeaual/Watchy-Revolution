@@ -4,7 +4,7 @@
 
 [![Build](https://github.com/jeandeaual/Watchy-Revolution/actions/workflows/build.yml/badge.svg)](https://github.com/jeandeaual/Watchy-Revolution/actions/workflows/build.yml)
 
-This is a watch face for the open E-Ink display smartwatch [Watchy](https://watchy.sqfmi.com/).
+This is a watch face for the open-source e-paper smartwatch [Watchy](https://watchy.sqfmi.com/).
 
 It shows the current date in the [French Republican calendar](https://en.wikipedia.org/wiki/French_Republican_calendar) (also called the French Revolutionary calendar)
 and the current [decimal time](https://en.wikipedia.org/wiki/Decimal_time).

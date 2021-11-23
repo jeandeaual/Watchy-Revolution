@@ -346,7 +346,7 @@ void Revolution::handleButtonPress()
             increaseMode();
 
 #ifdef DEBUG
-    Serial.printf("Switching to watchface mode %d\n", mode);
+            Serial.printf("Switching to watchface mode %d\n", mode);
 #endif
 
             // Resets the alarm flag in the RTC
@@ -366,7 +366,7 @@ void Revolution::handleButtonPress()
             decreaseMode();
 
 #ifdef DEBUG
-    Serial.printf("Switching to watchface mode %d\n", mode);
+            Serial.printf("Switching to watchface mode %d\n", mode);
 #endif
 
             // Resets the alarm flag in the RTC
@@ -446,9 +446,9 @@ void Revolution::handleButtonPress()
                 if (guiState == WATCHFACE_STATE) {
                     increaseMode();
 
-        #ifdef DEBUG
-            Serial.printf("Switching to watchface mode %d\n", mode);
-        #endif
+#ifdef DEBUG
+                    Serial.printf("Switching to watchface mode %d\n", mode);
+#endif
 
                     // Resets the alarm flag in the RTC
                     this->resetAlarm();
@@ -469,9 +469,9 @@ void Revolution::handleButtonPress()
                 if (guiState == WATCHFACE_STATE) {
                     decreaseMode();
 
-        #ifdef DEBUG
-            Serial.printf("Switching to watchface mode %d\n", mode);
-        #endif
+#ifdef DEBUG
+                    Serial.printf("Switching to watchface mode %d\n", mode);
+#endif
 
                     // Resets the alarm flag in the RTC
                     this->resetAlarm();

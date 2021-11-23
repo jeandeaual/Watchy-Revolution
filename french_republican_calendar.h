@@ -1,8 +1,8 @@
 #ifndef FRENCH_REPUBLICAN_CALENDAR_H
 #define FRENCH_REPUBLICAN_CALENDAR_H
 
-#include <time.h>
 #include <Arduino.h>
+#include <time.h>
 
 class FrenchRepublicanCalendar
 {

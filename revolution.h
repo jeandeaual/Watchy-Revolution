@@ -1,8 +1,8 @@
 #ifndef REVOLUTION_H
 #define REVOLUTION_H
 
-#include "french_republican_calendar.h"
 #include "decimal_time.h"
+#include "french_republican_calendar.h"
 #include <Watchy.h>
 
 class Revolution : public Watchy

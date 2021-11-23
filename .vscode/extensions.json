@@ -1,7 +1,9 @@
 {
     "recommendations": [
-        "vsciot-vscode.vscode-arduino",
         "ms-vscode.cpptools",
+        "jeff-hykin.better-cpp-syntax",
+        "vsciot-vscode.vscode-arduino",
+        "xaver.clang-format",
         "bierner.markdown-preview-github-styles"
     ]
 }

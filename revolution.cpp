@@ -176,7 +176,7 @@ void Revolution::drawDate()
     this->display.setFont(&LibertinusSerif_Regular_French_ASCII13pt7b);
 
     const char *dayOfWeek = this->calendar.getWeekDayName();
-    int day = this->calendar.getDay();
+    const int day = this->calendar.getDay();
     const char *month = this->calendar.getMonthName();
     const String year = this->yearRoman ? this->calendar.getRomanizedYear() : String(this->calendar.getYear());
     const char *dayOfYear = this->calendar.getYearDayName();
@@ -188,12 +188,12 @@ void Revolution::drawDate()
         asprintf(&date, "%d %s", day, month);
     }
 
-    static const uint16_t y_offset = 22;
+    static const uint16_t y_offset = 25;
     uint16_t base_y;
 
     switch (mode) {
     case Mode::DigitalDate:
-        base_y = GxEPD2_154_D67::HEIGHT / 2 + 12;
+        base_y = GxEPD2_154_D67::HEIGHT / 2 + 5;
         this->drawCenteredString(dayOfWeek, x, base_y);
         this->drawCenteredString(date, x, base_y + y_offset);
         this->drawCenteredString(year.c_str(), x, base_y + y_offset * 2);
@@ -293,7 +293,7 @@ void Revolution::resetAlarm()
 // Reimplemented from Watchy to use ALARM1 instead of ALARM2 and to switch between modes
 void Revolution::handleButtonPress()
 {
-    uint64_t wakeupBit = esp_sleep_get_ext1_wakeup_status();
+    const uint64_t wakeupBit = esp_sleep_get_ext1_wakeup_status();
     if (wakeupBit & MENU_BTN_MASK) {
         // Menu button
         if (guiState == WATCHFACE_STATE) {
